@@ -8,16 +8,8 @@
 #include <unistd.h>
 #include <arpa/inet.h>
 #include <string.h>
-// #include <signal.h>
 
 #define MAX_DATA 4096
-
-// static volatile int keepRunning = 1;
-
-// void intHandler(int dummy)
-// {
-//     keepRunning = 0;
-// }
 
 void main()
 {
@@ -25,18 +17,15 @@ void main()
     int listenfd, connfd;          /* socket descriptor */
     struct sockaddr_in s1, client; /* variable names for the socket addr data structure */
     int cli_len = sizeof(client);
-    int total, sent, bytes;            /* varibles related to sending reply */
-    int total_size, received, n_bytes; /* variables related to receiving response */
-    char buf[MAX_DATA];                /* data sent by client stored in buf */
+    int total, sent, bytes, received;
+    char buf[MAX_DATA]; /* data sent by client stored in buf */
     char *reply =
         "HTTP/1.1 200 OK\r\n"
         "Content-Type: text/html; charset=UTF-8\r\n\r\n"
         "<!DOCTYPE html>\r\n"
         "\n"
         "<html><head><title>EE4210_CA2_PRIYAN</title></head>\r\n"
-        "<body><form><input type = \"text\"><input type = \"submit\"</form></body><html>\r\n";
-
-    // signal(SIGINT, intHandler);
+        "<body><form method = \"post\" action = \"/\"><input name = \"userin\" type = \"text\"><input value = \"submit\" type = \"submit\"</form></body><html>\r\n";
 
     /* socket creation */
     if ((listenfd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
@@ -67,12 +56,26 @@ void main()
     /* accepting with implementation of concurrent server using fork() */
     while (1)
     {
+
         connfd = accept(listenfd, (struct sockaddr *)&client, &cli_len);
         if (connfd < 0)
         {
             perror("accept");
             exit(1);
         }
+
+        /* sending the HTML file*/
+        total = strlen(reply);
+        sent = 0;
+        do
+        {
+            int bytes = write(connfd, reply + sent, total - sent);
+            if (bytes < 0)
+                perror("ERROR writing message to socket");
+            if (bytes == 0)
+                break;
+            sent += bytes;
+        } while (sent < total);
 
         printf("New Client connected from port number %d and IP address  %s\n", ntohs(client.sin_port), inet_ntoa(client.sin_addr));
 
@@ -82,18 +85,7 @@ void main()
             close(listenfd);
             /* processing */
 
-            /* sending the HTML file*/
-            total = strlen(reply);
-            sent = 0;
-            do
-            {
-                int bytes = write(connfd, reply + sent, total - sent);
-                if (bytes < 0)
-                    perror("ERROR writing message to socket");
-                if (bytes == 0)
-                    break;
-                sent += bytes;
-            } while (sent < total);
+            /* receiving response */
 
             memset(buf, 0, sizeof(buf));
             total = sizeof(buf) - 1;
@@ -111,14 +103,27 @@ void main()
             if (received == total)
                 perror("ERROR storing complete response from socket");
 
-            printf("client disconnected\n");
-            buf[n_bytes] = '\0';
-            printf("Printing BUF : %s\n", buf);
-            printf("Goodbye\n");
+            buf[bytes] = '\0';
+            printf("Printing BUF in child: %s\n\n\n", buf);
+
+            // char *token = NULL;
+            // token = strtok(buf, "\n");
+            // while (token)
+            // {
+            //     printf("Current token: %s.\n", token);
+            //     token = strtok(NULL, "\n");
+            // }
+
+            printf("received %d in child\n\n", received);
+
+            printf("Closing Child\n\n");
+            close(connfd);
+            exit(0);
         }
     }
 
     /* parent */
     close(connfd);
+    printf("Closing Parent\n");
     exit(0);
 }
