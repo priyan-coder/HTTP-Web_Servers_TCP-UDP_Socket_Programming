@@ -8,13 +8,8 @@
 #include <unistd.h>
 #include <arpa/inet.h>
 #include <string.h>
-// #ifndef __cplusplus
-// typedef unsigned char bool;
-// static const bool false = 0;
-// static const bool true = 1;
-// #endif
 
-#define MAX_DATA 4096
+#define MAX_DATA 1024
 
 void main()
 {
@@ -22,15 +17,14 @@ void main()
     int listenfd, connfd;          /* socket descriptor */
     struct sockaddr_in s1, client; /* variable names for the socket addr data structure */
     int cli_len = sizeof(client);
-    int data_len;       /* length of data sent by client */
     char buf[MAX_DATA]; /* data sent by client stored in buf */
     char *reply =
         "HTTP/1.1 200 OK\r\n"
         "Content-Type: text/html; charset=UTF-8\r\n\r\n"
         "<!DOCTYPE html>\r\n"
         "\n"
-        "<html><head><title>Testing</title></head>\r\n"
-        "<body><p>Testing</p></body><html>\r\n";
+        "<html><head><title>EE4210_CA2_PRIYAN</title></head>\r\n"
+        "<body><input></body><html>\r\n";
 
     /* socket creation */
     if ((listenfd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
@@ -75,22 +69,26 @@ void main()
         {
             close(listenfd);
             /* processing */
-            data_len = 1;
-            while (data_len)
+
+            int total = strlen(reply);
+            int sent = 0;
+            do
             {
-                data_len = recv(connfd, buf, MAX_DATA, 0);
-                if (data_len > 0)
-                {
-                    send(connfd, reply, sizeof(reply), 0);
-                    printf("sent");
-                }
-            }
+                int bytes = write(connfd, reply + sent, total - sent);
+                if (bytes < 0)
+                    perror("ERROR writing message to socket");
+                if (bytes == 0)
+                    break;
+                sent += bytes;
+            } while (sent < total);
+
+            printf("client disconnected\n");
+            close(connfd);
+            
         }
-        printf("client disconnected\n");
-        close(connfd);
-        exit(0);
     }
 
     /* parent */
     close(connfd);
+    exit(0);
 }

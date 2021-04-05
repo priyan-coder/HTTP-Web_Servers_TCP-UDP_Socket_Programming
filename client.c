@@ -9,7 +9,7 @@
 #include <arpa/inet.h>
 #include <string.h>
 
-#define MAX_DATA 4096
+#define MAX_DATA 1024
 
 void main(int argc, char **argv)
 {
