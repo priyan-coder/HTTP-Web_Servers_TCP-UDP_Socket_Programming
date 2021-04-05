@@ -8,8 +8,13 @@
 #include <unistd.h>
 #include <arpa/inet.h>
 #include <string.h>
+// #ifndef __cplusplus
+// typedef unsigned char bool;
+// static const bool false = 0;
+// static const bool true = 1;
+// #endif
 
-#define MAX_DATA 2048
+#define MAX_DATA 4096
 
 void main()
 {
@@ -17,8 +22,15 @@ void main()
     int listenfd, connfd;          /* socket descriptor */
     struct sockaddr_in s1, client; /* variable names for the socket addr data structure */
     int cli_len = sizeof(client);
-    int data_len; /* length of data sent by client */
-    char buf[MAX_DATA];
+    int data_len;       /* length of data sent by client */
+    char buf[MAX_DATA]; /* data sent by client stored in buf */
+    char *reply =
+        "HTTP/1.1 200 OK\r\n"
+        "Content-Type: text/html; charset=UTF-8\r\n\r\n"
+        "<!DOCTYPE html>\r\n"
+        "\n"
+        "<html><head><title>Testing</title></head>\r\n"
+        "<body><p>Testing</p></body><html>\r\n";
 
     /* socket creation */
     if ((listenfd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
@@ -69,23 +81,16 @@ void main()
                 data_len = recv(connfd, buf, MAX_DATA, 0);
                 if (data_len > 0)
                 {
-                    FILE *html_data;
-                    html_data = fopen("index.html", "r");
-                    char response_data[1024];
-                    int size = fread(response_data, (sizeof(response_data) - 1), 1, html_data);
-                    response_data[size] = '\0'; // Add null terminator to string
-                    char http_header[MAX_DATA] = "HTTP/1.1 200 OK\r\n\n";
-                    strcat(http_header, response_data);
-                    send(connfd, http_header, sizeof(http_header), 0);
-                    printf("sent html to client\n");
+                    send(connfd, reply, sizeof(reply), 0);
+                    printf("sent");
                 }
             }
-            printf("client disconnected\n");
-            close(connfd);
-            exit(0);
         }
-
-        /* parent */
+        printf("client disconnected\n");
         close(connfd);
+        exit(0);
     }
+
+    /* parent */
+    close(connfd);
 }
