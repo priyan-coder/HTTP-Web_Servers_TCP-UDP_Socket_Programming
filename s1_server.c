@@ -95,7 +95,7 @@ void main()
 
             buf[received] = '\0';
             printf("Currently stored in buffer :\n %s\n", buf);
-            printf("Received %d bits in child\n\n", received);
+            printf("Received %d bytes in child\n\n", received);
 
             /* Request Handlers */
 
