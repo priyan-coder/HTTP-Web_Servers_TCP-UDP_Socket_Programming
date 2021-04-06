@@ -27,12 +27,17 @@ void main()
     int cli_len = sizeof(client);
     int sent, received;
     char buf[MAX_DATA]; /* current data sent by client stored in buf */
+    char headers[MAX_DATA] = "HTTP/1.1 200 OK\r\n"
+                             "Content-Type: text/html; charset=UTF-8\r\n\r\n"
+                             "<!DOCTYPE html>\r\n"
+                             "\n"
+                             "<html><head><title>EE4210_CA2_PRIYAN</title></head>\r\n";
     char *reply = "HTTP/1.1 200 OK\r\n"
                   "Content-Type: text/html; charset=UTF-8\r\n\r\n"
                   "<!DOCTYPE html>\r\n"
                   "\n"
                   "<html><head><title>EE4210_CA2_PRIYAN</title></head>\r\n"
-                  "<body><form method = \"post\" action = \"/\"><p>You Typed : Please type your input here !</p><input name = \"userin\" type = \"text\"></form></body><html>\r\n";
+                  "<body><form method = \"post\" action = \"/\"><p>Please type your input here !</p><input name = \"userin\" type = \"text\"></form></body><html>\r\n";
 
     /* socket creation */
     if ((listenfd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
@@ -42,7 +47,7 @@ void main()
     }
 
     s1.sin_family = AF_INET;
-    s1.sin_port = htons(SERVER_PORT); 
+    s1.sin_port = htons(SERVER_PORT);
     s1.sin_addr.s_addr = htonl(INADDR_ANY);
     bzero(&s1.sin_zero, 0);
 
@@ -118,7 +123,15 @@ void main()
                 {
                     printf("Last token: '%s'\n", last + 1);
                 }
-                }
+
+                char *head_new_body = "<body><p>";
+                char *end_new_body = "</p></body><html>\r\n";
+                strcat(headers, head_new_body);
+                strcat(headers, last + 1);
+                strcat(headers, end_new_body);
+                printf("%s", headers);
+                send(connfd, headers, strlen(headers), 0);
+            }
             else
             {
                 printf("No POST request made");
