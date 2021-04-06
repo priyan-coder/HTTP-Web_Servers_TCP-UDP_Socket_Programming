@@ -33,7 +33,7 @@ void main()
         "<!DOCTYPE html>\r\n"
         "\n"
         "<html><head><title>EE4210_CA2_PRIYAN</title></head>\r\n"
-        "<body><form method = \"post\" action = \"/\"><input name = \"userin\" type = \"text\"><input value = \"submit\" type = \"submit\"</form></body><html>\r\n";
+        "<body><form method = \"post\" action = \"/\"><input name = \"userin\" type = \"text\"></form></body><html>\r\n";
 
     /* socket creation */
     if ((listenfd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
@@ -87,7 +87,7 @@ void main()
 
             buf[received] = '\0';
             printf("Printing BUF in child: %s\n\n\n", buf);
-            printf("received %d in child\n\n", received);
+            printf("received %d bytes in child\n\n", received);
 
             if (received <= 0)
             {
@@ -95,9 +95,10 @@ void main()
                 exit(1);
             }
 
+            
             /* sending the HTML file*/
             sent = 0;
-            sent = send(connfd, reply, strlen(reply),0);
+            sent = send(connfd, reply, strlen(reply), 0);
 
             printf("sent : %s", reply);
 
@@ -105,6 +106,28 @@ void main()
             {
                 perror("Didnt send any from server");
                 exit(1);
+            }
+
+            if (strstr(buf, "POST") != NULL)
+            {
+
+                printf("detected POST");
+                char *token, *last;
+                last = token = strtok(buf, "userin=");
+                for (; (token = strtok(NULL, "userin=")) != NULL; last = token)
+                    ;
+
+                sprintf(reply, "HTTP/1.1 200 OK\r\n"
+                               "Content-Type: text/html; charset=UTF-8\r\n\r\n"
+                               "<!DOCTYPE html>\r\n"
+                               "\n"
+                               "<html><head><title>EE4210_CA2_PRIYAN</title></head>\r\n"
+                               "<body><form method = \"post\" action = \"/\"><p>You Typed : %s</p><input name = \"userin\" type = \"text\"></form></body><html>\r\n",
+                        last);
+                printf("%s", last);
+                send(connfd, reply, strlen(reply), 0);
+            } else {
+                printf("Dint find POST");
             }
 
             printf("Closing Child\n\n");
@@ -118,34 +141,3 @@ void main()
     printf("Closing Parent\n");
     exit(0);
 }
-
-// /// Write the request
-// if (write(sockfd, sendline, strlen(sendline)) >= 0)
-// {
-// }
-
-//        total = sizeof(buf) - 1;
-//             received = 0;
-//             do
-//             {
-//                 bytes = read(connfd, buf + received, total - received);
-//                 if (bytes < 0)
-//                     perror("ERROR reading response from socket");
-//                 if (bytes == 0)
-//                     break;
-//                 received += bytes;
-//             } while (received < total);
-
-//             if (received == total)
-//                 perror("ERROR storing complete response from socket");
-//   total = strlen(reply);
-//             sent = 0;
-//             do
-//             {
-//                 int bytes = write(connfd, reply + sent, total - sent);
-//                 if (bytes < 0)
-//                     perror("ERROR writing message to socket");
-//                 if (bytes == 0)
-//                     break;
-//                 sent += bytes;
-//             } while (sent < total);
