@@ -114,6 +114,7 @@ void main()
                 }
                 printf("Handled GET req and sent : \n %s", reply);
             }
+            /* Handle POST req*/
 
             if (strstr(buf, "POST") != NULL)
             {
