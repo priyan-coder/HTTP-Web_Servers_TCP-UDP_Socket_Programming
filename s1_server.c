@@ -26,7 +26,7 @@ void main()
     struct sockaddr_in s1, client; /* variable names for the socket addr data structure */
     int cli_len = sizeof(client);
     int sent, received;
-    char buf[MAX_DATA]; /* current data sent by client stored in buf */
+    char buf[MAX_DATA]; /* current data sent by client stored in buf of server */
     char headers[MAX_DATA] = "HTTP/1.1 200 OK\r\n"
                              "Content-Type: text/html; charset=UTF-8\r\n\r\n"
                              "<!DOCTYPE html>\r\n"
@@ -42,7 +42,7 @@ void main()
     /* socket creation */
     if ((listenfd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
     {
-        perror("socket");
+        perror("socket\n");
         exit(1);
     }
 
@@ -54,14 +54,14 @@ void main()
     /* binding */
     if (bind(listenfd, (struct sockaddr *)&s1, sizeof(s1)) < 0)
     {
-        perror("bind");
+        perror("bind\n");
         exit(1);
     }
 
     /* listening */
     if (listen(listenfd, 10) < 0)
     {
-        perror("listen");
+        perror("listen\n");
         exit(1);
     }
 
@@ -71,7 +71,7 @@ void main()
         connfd = accept(listenfd, (struct sockaddr *)&client, &cli_len);
         if (connfd < 0)
         {
-            perror("accept");
+            perror("accept\n");
             exit(1);
         }
 
@@ -87,32 +87,32 @@ void main()
             received = 0;
 
             received = recv(connfd, buf, MAX_DATA - 1, 0);
-
-            buf[received] = '\0';
-            printf("Printing BUF in child: %s\n\n\n", buf);
-            printf("received %d bytes in child\n\n", received);
-
             if (received <= 0)
             {
-                perror("Didnt read any from client");
+                perror("Didnt read any from client\n");
                 exit(1);
             }
 
-            /* processing */
+            buf[received] = '\0';
+            printf("Currently stored in buffer :\n %s\n", buf);
+            printf("Received %d bits in child\n\n", received);
 
+            /* Request Handlers */
+
+            /* Handle GET req*/
             if (strstr(buf, "GET") != NULL)
             {
-                printf("Detected GET");
+                printf("Detected GET\n\n");
 
                 /* sending the HTML file*/
                 sent = 0;
                 sent = send(connfd, reply, strlen(reply), 0);
-                printf("sent : %s", reply);
                 if (sent <= 0)
                 {
-                    perror("Didnt send any from server");
+                    perror("Didnt send any from server\n");
                     exit(1);
                 }
+                printf("Handled GET req and sent : \n %s", reply);
             }
 
             if (strstr(buf, "POST") != NULL)
@@ -121,23 +121,27 @@ void main()
                 char *last = strrchr(buf, '=');
                 if (last != NULL)
                 {
-                    printf("Last token: '%s'\n", last + 1);
+                    printf("User entered Input: '%s'\n", last + 1);
                 }
 
                 char *head_new_body = "<body><p>";
                 char *end_new_body = "</p></body><html>\r\n";
+                char *text = "You entered the following : ";
                 strcat(headers, head_new_body);
+                strcat(headers, text);
                 strcat(headers, last + 1);
                 strcat(headers, end_new_body);
-                printf("%s", headers);
-                send(connfd, headers, strlen(headers), 0);
-            }
-            else
-            {
-                printf("No POST request made");
+                sent = 0;
+                sent = send(connfd, headers, strlen(headers), 0);
+                if (sent <= 0)
+                {
+                    perror("Didnt send any from server\n");
+                    exit(1);
+                }
+                printf("Handled POST req and sent back the following : \n %s", headers);
             }
 
-            printf("Closing Child\n\n");
+            printf("Closing Child Process\n\n");
             close(connfd);
             exit(0);
         }
@@ -145,6 +149,6 @@ void main()
 
     /* parent */
     close(connfd);
-    printf("Closing Parent\n");
+    printf("Closing Parent process\n\n");
     exit(0);
 }
