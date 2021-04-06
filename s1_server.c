@@ -25,15 +25,14 @@ void main()
     int listenfd, connfd;          /* socket descriptor */
     struct sockaddr_in s1, client; /* variable names for the socket addr data structure */
     int cli_len = sizeof(client);
-    int total, sent, received;
-    char buf[MAX_DATA]; /* data sent by client stored in buf */
-    char *reply =
-        "HTTP/1.1 200 OK\r\n"
-        "Content-Type: text/html; charset=UTF-8\r\n\r\n"
-        "<!DOCTYPE html>\r\n"
-        "\n"
-        "<html><head><title>EE4210_CA2_PRIYAN</title></head>\r\n"
-        "<body><form method = \"post\" action = \"/\"><input name = \"userin\" type = \"text\"></form></body><html>\r\n";
+    int sent, received;
+    char buf[MAX_DATA]; /* current data sent by client stored in buf */
+    char *reply = "HTTP/1.1 200 OK\r\n"
+                  "Content-Type: text/html; charset=UTF-8\r\n\r\n"
+                  "<!DOCTYPE html>\r\n"
+                  "\n"
+                  "<html><head><title>EE4210_CA2_PRIYAN</title></head>\r\n"
+                  "<body><form method = \"post\" action = \"/\"><p>You Typed : Please type your input here !</p><input name = \"userin\" type = \"text\"></form></body><html>\r\n";
 
     /* socket creation */
     if ((listenfd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
@@ -43,7 +42,7 @@ void main()
     }
 
     s1.sin_family = AF_INET;
-    s1.sin_port = htons(SERVER_PORT); /* using port 1200 for s1 */
+    s1.sin_port = htons(SERVER_PORT); 
     s1.sin_addr.s_addr = htonl(INADDR_ANY);
     bzero(&s1.sin_zero, 0);
 
@@ -77,9 +76,8 @@ void main()
         if ((pid = fork()) == 0)
         {
             close(listenfd);
-            /* processing */
 
-            /* receiving response */
+            /* receiving request */
             memset(buf, 0, sizeof(buf));
             received = 0;
 
@@ -95,39 +93,35 @@ void main()
                 exit(1);
             }
 
-            
-            /* sending the HTML file*/
-            sent = 0;
-            sent = send(connfd, reply, strlen(reply), 0);
+            /* processing */
 
-            printf("sent : %s", reply);
-
-            if (sent <= 0)
+            if (strstr(buf, "GET") != NULL)
             {
-                perror("Didnt send any from server");
-                exit(1);
+                printf("Detected GET");
+
+                /* sending the HTML file*/
+                sent = 0;
+                sent = send(connfd, reply, strlen(reply), 0);
+                printf("sent : %s", reply);
+                if (sent <= 0)
+                {
+                    perror("Didnt send any from server");
+                    exit(1);
+                }
             }
 
             if (strstr(buf, "POST") != NULL)
             {
-
-                printf("detected POST");
-                char *token, *last;
-                last = token = strtok(buf, "userin=");
-                for (; (token = strtok(NULL, "userin=")) != NULL; last = token)
-                    ;
-
-                sprintf(reply, "HTTP/1.1 200 OK\r\n"
-                               "Content-Type: text/html; charset=UTF-8\r\n\r\n"
-                               "<!DOCTYPE html>\r\n"
-                               "\n"
-                               "<html><head><title>EE4210_CA2_PRIYAN</title></head>\r\n"
-                               "<body><form method = \"post\" action = \"/\"><p>You Typed : %s</p><input name = \"userin\" type = \"text\"></form></body><html>\r\n",
-                        last);
-                printf("%s", last);
-                send(connfd, reply, strlen(reply), 0);
-            } else {
-                printf("Dint find POST");
+                printf("Detected POST\n\n");
+                char *last = strrchr(buf, '=');
+                if (last != NULL)
+                {
+                    printf("Last token: '%s'\n", last + 1);
+                }
+                }
+            else
+            {
+                printf("No POST request made");
             }
 
             printf("Closing Child\n\n");
