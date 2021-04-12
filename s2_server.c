@@ -18,6 +18,8 @@
 
 #define MAX_DATA 1024
 #define SERVER_PORT 1600
+
+// UDP Concurrent server
 // run in cmd line : gcc s2_server.c - lm - o s2
 // ./s2
 
@@ -86,7 +88,7 @@ void main()
 
                 /* sending the HTML file*/
                 sent = 0;
-                sent = sendto(fd, reply, strlen(reply), 0, (struct sockaddr *)&s2, sizeof(s2));
+                sent = sendto(fd, reply, strlen(reply), 0, (struct sockaddr *)&client, cli_len);
                 if (sent <= 0)
                 {
                     perror("Didnt send any from server\n");

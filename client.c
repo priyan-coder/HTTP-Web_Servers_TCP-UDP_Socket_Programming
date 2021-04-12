@@ -24,6 +24,7 @@ void main(int argc, char **argv)
     int sock, len, sent;
     char input[MAX_DATA];
     char *request = "GET HTTP/1.1\r\n";
+    int srvlen = sizeof(remote_server);
 
     if (argc != 3)
     {
@@ -46,7 +47,7 @@ void main(int argc, char **argv)
 
     sent = sendto(sock, request, strlen(request), 0, (struct sockaddr *)&remote_server, sizeof(remote_server));
     printf("Sent\n");
-    len = recvfrom(sock, input, sizeof(input), 0, (struct sockaddr *)&remote_server, (socklen_t *)sizeof(remote_server));
+    len = recvfrom(sock, input, sizeof(input), 0, (struct sockaddr *)&remote_server, &srvlen);
     printf("Received\n ");
     input[len] = '\0';
     printf("Received from, server : %s\n", input);

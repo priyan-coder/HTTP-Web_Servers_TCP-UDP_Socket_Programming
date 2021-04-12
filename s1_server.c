@@ -19,6 +19,7 @@
 #define MAX_DATA 4096
 #define SERVER_PORT 1200
 
+// TCP Concurrent Server using fork
 void main()
 {
     pid_t pid;                     /* process id */
