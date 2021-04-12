@@ -19,6 +19,7 @@
 #define MAX_DATA 1024
 #define SERVER_PORT 1600
 // run in cmd line : gcc s2_server.c - lm - o s2
+// ./s2
 
 void main()
 {
@@ -55,29 +56,28 @@ void main()
     }
     while (1)
     {
+        /* receiving request */
+        memset(buf, 0, sizeof(buf));
+        received = 0;
+
+        received = recvfrom(fd, buf, sizeof(buf), 0, (struct sockaddr *)&client, &cli_len);
+        if (received <= 0)
+        {
+            perror("Didnt read any from client\n");
+            exit(1);
+        }
+
+        printf("New Client connected from port number %d and IP address  %s\n", ntohs(client.sin_port), inet_ntoa(client.sin_addr));
+
+        buf[received] = '\0';
+        printf("Currently stored in buffer :\n %s\n", buf);
+        printf("Received %d bytes in child\n\n", received);
 
         /* child */
         if ((pid = fork()) == 0)
         {
 
             /* implementation of concurrent server using fork() */
-
-            /* receiving request */
-            memset(buf, 0, sizeof(buf));
-            received = 0;
-
-            received = recvfrom(fd, buf, sizeof(buf), 0, (struct sockaddr *)&client, &cli_len);
-            if (received <= 0)
-            {
-                perror("Didnt read any from client\n");
-                exit(1);
-            }
-
-            printf("New Client connected from port number %d and IP address  %s\n", ntohs(client.sin_port), inet_ntoa(client.sin_addr));
-
-            buf[received] = '\0';
-            printf("Currently stored in buffer :\n %s\n", buf);
-            printf("Received %d bytes in child\n\n", received);
 
             /* Handle GET req*/
             if (strstr(buf, "GET") != NULL)
@@ -98,7 +98,7 @@ void main()
             printf("Exiting Child Process\n\n");
             exit(0);
         }
-        printf("Looping to create a new child for receiving data\n");
+        // printf("Looping to create a new child for handling request \n");
     }
     printf("Closing Socket in Parent\n");
     close(fd);
