@@ -8,15 +8,22 @@
 #include <unistd.h>
 #include <arpa/inet.h>
 #include <string.h>
+#include <signal.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <sys/time.h>
+#include <sys/ioctl.h>
+#include <netdb.h>
+#include <stdarg.h>
 
-#define MAX_DATA 1024
+#define MAX_DATA 4096
 
 void main(int argc, char **argv)
 {
     struct sockaddr_in remote_server; /* variable names for the socket addr data structure */
-    int sock, len;
+    int sock, len, sent;
     char input[MAX_DATA];
-    char output[MAX_DATA];
+    char *request = "GET HTTP/1.1\r\n";
 
     if (argc != 3)
     {
@@ -26,7 +33,7 @@ void main(int argc, char **argv)
     }
 
     /* socket creation */
-    if ((sock = socket(AF_INET, SOCK_STREAM, 0)) == -1)
+    if ((sock = socket(AF_INET, SOCK_DGRAM, 0)) == -1)
     {
         perror("socket");
         exit(1);
@@ -37,21 +44,12 @@ void main(int argc, char **argv)
     remote_server.sin_addr.s_addr = inet_addr(argv[1]);
     bzero(&remote_server.sin_zero, 0);
 
-    /* connecting */
-    if (connect(sock, (struct sockaddr*)&remote_server, sizeof(remote_server)) == -1)
-    {
-        perror("connect");
-        exit(1);
-    }
-
-    while (1)
-    {
-        fgets(input, MAX_DATA, stdin);
-        send(sock, input, strlen(input), 0);
-        len = recv(sock, output, MAX_DATA, 0);
-        output[len] = '\0';
-        printf("%s\n", output);
-    }
-
+    sent = sendto(sock, request, strlen(request), 0, (struct sockaddr *)&remote_server, sizeof(remote_server));
+    printf("Sent\n");
+    len = recvfrom(sock, input, sizeof(input), 0, (struct sockaddr *)&remote_server, (socklen_t *)sizeof(remote_server));
+    printf("Received\n ");
+    input[len] = '\0';
+    printf("Received from, server : %s\n", input);
     close(sock);
+    exit(0);
 }
