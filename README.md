@@ -23,7 +23,7 @@ To test out the UDP Server:
 
 1. Compile by:   gcc s2_server.c - lm - o s2
 2. Exe as:  ./s2
-3. You can use software such as netcat(nc) to send requests to the server. Alternatively you could write your own simple client for testing. 
+3. You can use software such as netcat(nc) to send requests to the server at port 1600. Alternatively you could write your own simple client for testing. 
 4. Server returns a HTTP response of a web-page displaying the text “EE-4210: Continuous assessment”
 
 NOTE: Since web browsers use TCP by default, you will not be able to use your usual web browser for connecting to a UDP server.
