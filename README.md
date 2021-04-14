@@ -6,7 +6,7 @@ The first server (s1) uses TCP as the transport protocol while the second server
 
 1. Both the servers are concurrent i.e. they are able to serve multiple HTTP requests simultaneously.
 2. For s1: The HTTP response is a web-page having a form with one text input. After the text is entered, s1 updates the web-page by displaying the entered text.
-3. For s2: The HTTP response needs to be a web-page displaying the text “EE-4210: Continuous assessment”.
+3. For s2: The HTTP response is a web-page displaying the text “EE-4210: Continuous assessment”.
 4. Non-standard ports are used.
 5. The HTTP headers are constructed as a string in this implementation without the use of any external libraries/API.
 
