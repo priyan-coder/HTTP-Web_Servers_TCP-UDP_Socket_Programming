@@ -16,7 +16,7 @@ To test out the TCP Server:
 1. Compile by:  gcc s1_server.c - lm - o s1
 2. Exe as:  ./s1
 3. Head over to : http://localhost:1200/
-4. Type in any input into the field displayed and the server should return a response that displays your input.
+4. Type in any input into the field displayed, hit ENTER and the server should return a response that displays your input.
 
 
 To test out the UDP Server: 
