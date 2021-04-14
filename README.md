@@ -13,15 +13,15 @@ The first server (s1) uses TCP as the transport protocol while the second server
 
 To test out the TCP Server: 
 
-1. Compile by :  gcc s1_server.c - lm - o s1
-2. Exe as : ./s1
+1. Compile by:  gcc s1_server.c - lm - o s1
+2. Exe as:  ./s1
 3. Head over to : http://localhost:1200/
 4. Type in any input into the field displayed and the server should return a response that displays your input.
 
 
 To test out the UDP Server: 
 
-1. Compile by :  gcc s2_server.c - lm - o s2
-2. Exe as : ./s2
+1. Compile by:   gcc s2_server.c - lm - o s2
+2. Exe as:  ./s2
 3. You can execute the client code provided to send out a GET request to the IP address and Port (1600) of server s2. 
 4. Server returns a HTTP response of a web-page displaying the text “EE-4210: Continuous assessment”
