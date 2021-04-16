@@ -117,7 +117,7 @@ void main()
             }
             /* Handle POST req*/
 
-            if (strstr(buf, "POST") != NULL)
+            if (strstr(buf, "POST") != NULL && strstr(buf, "HTTP/1.1") != NULL)
             {
                 printf("Detected POST\n\n");
                 char *last = strrchr(buf, '=');
