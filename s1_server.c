@@ -101,7 +101,7 @@ void main()
             /* Request Handlers */
 
             /* Handle GET req*/
-            if (strstr(buf, "GET") != NULL)
+            if (strstr(buf, "GET") != NULL && strstr(buf, "HTTP/1.1") != NULL)
             {
                 printf("Detected GET\n\n");
 
