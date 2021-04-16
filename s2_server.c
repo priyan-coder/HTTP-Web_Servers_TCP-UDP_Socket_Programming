@@ -82,7 +82,7 @@ void main()
             /* implementation of concurrent server using fork() */
 
             /* Handle GET req*/
-            if (strstr(buf, "GET") != NULL)
+            if (strstr(buf, "GET") != NULL && strstr(buf, "HTTP/1.1") != NULL)
             {
                 printf("Detected GET\n\n");
 
@@ -95,6 +95,10 @@ void main()
                     exit(1);
                 }
                 printf("Handled GET req and sent : \n %s", reply);
+            }
+            else
+            {
+                printf("Ensure a get request with HTTP/1.1\n");
             }
 
             printf("Exiting Child Process\n\n");
